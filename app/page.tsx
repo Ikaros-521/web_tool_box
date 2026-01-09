@@ -1,65 +1,96 @@
-import Image from "next/image";
+"use client"
+import Link from "next/link"
+import { useMemo, useState } from "react"
+import { tools } from "../lib/tools"
 
 export default function Home() {
+  const [q, setQ] = useState("")
+  const [cat, setCat] = useState<string>("全部")
+  const categories = useMemo(() => {
+    const set = new Set<string>(["全部"]) // 默认“全部”
+    tools.forEach((t) => set.add(t.category))
+    return Array.from(set)
+  }, [])
+  const results = useMemo(() => {
+    const query = q.trim().toLowerCase()
+    let list = tools
+    if (cat !== "全部") list = list.filter((t) => t.category === cat)
+    if (!query) return list
+    return list.filter((t) =>
+      [t.name, t.description, t.category, ...t.tags].some((s) => s.toLowerCase().includes(query))
+    )
+  }, [q, cat])
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="mx-auto max-w-5xl px-6 py-12">
+      <header className="mb-8 flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Web Tool Box</h1>
+        <Link href="/" className="text-sm text-zinc-600">首页</Link>
+      </header>
+
+      <div className="mb-4">
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="搜索工具（例如：json、csv、格式化）"
+          className="w-full rounded border border-zinc-300 bg-white px-4 py-2 outline-none focus:ring-2 focus:ring-zinc-400"
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      </div>
+
+      <div className="mb-6 flex flex-wrap gap-2">
+        {categories.map((c) => (
+          <button
+            key={c}
+            onClick={() => setCat(c)}
+            className={`rounded-full border px-3 py-1 text-sm ${
+              cat === c ? "bg-zinc-900 text-white border-zinc-900" : "bg-white text-zinc-700 border-zinc-300"
+            }`}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            {c}
+          </button>
+        ))}
+      </div>
+
+      {q.trim() === "" && cat === "全部" ? (
+        <div className="space-y-8">
+          {Array.from(new Set(tools.map((t) => t.category))).map((c) => (
+            <section key={c}>
+              <h2 className="mb-3 text-base font-semibold text-zinc-700">{c}</h2>
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {tools
+                  .filter((t) => t.category === c)
+                  .map((t) => (
+                    <li key={t.id} className="rounded border border-zinc-200 p-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="text-lg font-medium">{t.name}</h3>
+                          <p className="text-sm text-zinc-600">{t.description}</p>
+                        </div>
+                        <Link href={`/tools/${t.id}`} className="rounded bg-zinc-900 px-3 py-1.5 text-white">打开</Link>
+                      </div>
+                      <div className="mt-3 text-xs text-zinc-500">{t.tags.join(" · ")}</div>
+                    </li>
+                  ))}
+              </ul>
+            </section>
+          ))}
         </div>
-      </main>
+      ) : (
+        <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {results.map((t) => (
+            <li key={t.id} className="rounded border border-zinc-200 p-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h2 className="text-lg font-medium">{t.name}</h2>
+                  <p className="text-sm text-zinc-600">{t.description}</p>
+                </div>
+                <Link href={`/tools/${t.id}`} className="rounded bg-zinc-900 px-3 py-1.5 text-white">打开</Link>
+              </div>
+              <div className="mt-3 text-xs text-zinc-500">{t.tags.join(" · ")}</div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
-  );
+  )
 }
