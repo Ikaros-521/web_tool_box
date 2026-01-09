@@ -8,8 +8,8 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  // 解决GitHub Pages路径问题 - 只在生产环境应用assetPrefix
   ...(process.env.NODE_ENV === 'production' && {
+    basePath: '/web_tool_box',
     assetPrefix: '/web_tool_box',
   }),
   // 确保静态资源正确导出
