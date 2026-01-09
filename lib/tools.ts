@@ -24,5 +24,13 @@ export const tools: ToolDescriptor[] = [
     category: "文本处理",
     import: () => import("../tools/SrtToTxt"),
   },
+  {
+    id: "timestamp",
+    name: "时间戳转换",
+    description: "秒/毫秒、时间与时区转换，支持加减日期",
+    tags: ["时间", "时间戳", "时区", "日期"],
+    category: "时间工具",
+    import: () => import("../tools/TimestampTool"),
+  },
 ]
 

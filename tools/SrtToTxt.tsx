@@ -1,5 +1,10 @@
 "use client"
 import { useMemo, useState } from "react"
+import Card from "../components/ui/Card"
+import SectionHeader from "../components/ui/SectionHeader"
+import Textarea from "../components/ui/Textarea"
+import Input from "../components/ui/Input"
+import Button from "../components/ui/Button"
 
 function srtToText(src: string, joinBlockLines: boolean, stripTags: boolean) {
   const lines = src.replace(/\r\n?/g, "\n").split("\n")
@@ -39,12 +44,12 @@ export default function SrtToTxt() {
   const result = useMemo(() => srtToText(input, joinBlockLines, stripTags), [input, joinBlockLines, stripTags])
 
   return (
-    <div className="flex flex-col gap-4">
-      <h2 className="text-xl font-semibold">SRT 转 TXT</h2>
+    <div className="flex flex-col gap-6">
+      <SectionHeader title="SRT 转 TXT" />
       <div className="flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={joinBlockLines} onChange={(e) => setJoinBlockLines(e.target.checked)} />
-          合并同块行（空行分隔段落）
+          合并同块行
         </label>
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={stripTags} onChange={(e) => setStripTags(e.target.checked)} />
@@ -52,19 +57,16 @@ export default function SrtToTxt() {
         </label>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <textarea
-          value={input}
-          onInput={(e) => setInput((e.target as HTMLTextAreaElement).value)}
-          placeholder="粘贴 SRT 字幕内容"
-          className="min-h-[260px] w-full rounded border border-zinc-300 bg-white p-3 font-mono text-sm outline-none focus:ring-2 focus:ring-zinc-400"
-        />
-        <pre className="min-h-[260px] w-full rounded border border-zinc-200 bg-zinc-50 p-3 whitespace-pre-wrap break-words text-sm">{result}</pre>
+        <Card>
+          <Textarea value={input} onInput={(e) => setInput((e.target as HTMLTextAreaElement).value)} placeholder="粘贴 SRT 字幕内容" />
+        </Card>
+        <Card>
+          <pre className="min-h-[260px] whitespace-pre-wrap break-words text-sm p-3">{result}</pre>
+        </Card>
       </div>
       <div className="flex gap-2">
-        <button onClick={() => navigator.clipboard.writeText(result)} className="rounded bg-zinc-900 px-3 py-2 text-white">
-          复制结果
-        </button>
-        <button
+        <Button onClick={() => navigator.clipboard.writeText(result)}>复制结果</Button>
+        <Button variant="secondary"
           onClick={() => {
             const blob = new Blob([result], { type: "text/plain;charset=utf-8" })
             const url = URL.createObjectURL(blob)
@@ -76,10 +78,9 @@ export default function SrtToTxt() {
             a.remove()
             URL.revokeObjectURL(url)
           }}
-          className="rounded border border-zinc-300 bg-white px-3 py-2"
         >
           下载 TXT
-        </button>
+        </Button>
       </div>
     </div>
   )
